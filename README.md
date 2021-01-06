@@ -2,7 +2,7 @@
 简单的Excel2Json
 
 依赖
-ExcelDataReader.3.6.0
+ExcelDataReader.3.6.0 \r\n
 ExcelDataReader.DataSet.3.6.0
 Newtonsoft.Json.12.0.3
 
