@@ -82,7 +82,6 @@ namespace Excel2Json
                 OpenFD.ShowDialog();
                 fileName = OpenFD.FileName;
 
-                //TODO
                 try
                 {
                     MyExcelFunction.Transform(Url1.Text, fileName, curExcelType, Option_header_comboBox.SelectedIndex);

@@ -43,40 +43,46 @@ namespace Excel2Json
                 }            
                 var result = reader.AsDataSet();
 
-                Dictionary<string, object> singleTable = new Dictionary<string, object>();
-                for (int i = 0; i < result.Tables.Count; i++)
-                {
-                    List<object> items = new List<object>();
-                    System.Data.DataTable table = result.Tables[i];
-                    object[] names = table.Rows[0].ItemArray;
-                    object[] types = table.Rows[1].ItemArray;
-                    for (int j = 0; j < table.Rows.Count - rowStart; j++)
-                    {
-                        int m = j + rowStart;
-                        Type dynType = CreateType("row" + m, GetString(names, colStart), GetString(types, colStart));
-                        object myclass = Activator.CreateInstance(dynType);
-
-                        for (int k = 0; k < names.Length - colStart; k++)
-                        {
-                            int n = k + colStart;
-                            FieldInfo fi = dynType.GetField(names[n].ToString());
-                            if (fi == null)
-                                continue;
-                            try
-                            {
-                                fi.SetValue(myclass, Convert.ChangeType(table.Rows[m][n], GetYourType(types[n].ToString())));
-                            }
-                            catch
-                            {
-                                fi.SetValue(myclass, null);
-                            }
-                        }
-                        items.Add(myclass);
-                    }
-                    singleTable.Add(table.TableName, items);
-                }
-                JsonManager.WriteToJson(jsonPath, singleTable);
+                var temp = GetClassData(result, rowStart, colStart);
+                JsonManager.WriteToJson(jsonPath, temp);
             }
+        }
+
+        static Dictionary<string,object> GetClassData(DataSet result, int rowStart, int colStart = 0)
+        {
+            Dictionary<string, object> singleTable = new Dictionary<string, object>();
+            for (int i = 0; i < result.Tables.Count; i++)
+            {
+                List<object> items = new List<object>();
+                System.Data.DataTable table = result.Tables[i];
+                object[] names = table.Rows[0].ItemArray;
+                object[] types = table.Rows[1].ItemArray;
+                for (int j = 0; j < table.Rows.Count - rowStart; j++)
+                {
+                    int m = j + rowStart;
+                    Type dynType = CreateType("row" + m, GetString(names, colStart), GetString(types, colStart));
+                    object myclass = Activator.CreateInstance(dynType);
+
+                    for (int k = 0; k < names.Length - colStart; k++)
+                    {
+                        int n = k + colStart;
+                        FieldInfo fi = dynType.GetField(names[n].ToString());
+                        if (fi == null)
+                            continue;
+                        try
+                        {
+                            fi.SetValue(myclass, Convert.ChangeType(table.Rows[m][n], GetYourType(types[n].ToString())));
+                        }
+                        catch
+                        {
+                            fi.SetValue(myclass, null);
+                        }
+                    }
+                    items.Add(myclass);
+                }
+                singleTable.Add(table.TableName, items);
+            }
+            return singleTable;
         }
 
         static Type CreateType(string className, string[] fieldName, string[] fieldType)
@@ -91,11 +97,19 @@ namespace Excel2Json
             TypeBuilder tb = mb.DefineType(className, TypeAttributes.Public);
             for (int j = 0; j < fieldName.Length; j++)
             {
-                if (fieldName[j] == "" || fieldName[j] == string.Empty)
+                if (fieldName[j] == string.Empty)
                     continue;
 
-                //动态创建字段               
-                tb.DefineField(fieldName[j], GetYourType(fieldType[j]), FieldAttributes.Public);
+                try
+                {
+                    //动态创建字段               
+                    tb.DefineField(fieldName[j], GetYourType(fieldType[j]), FieldAttributes.Public);
+                }
+                catch
+                {
+                    continue;
+                }
+                
             }
 
             return tb.CreateType();

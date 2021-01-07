@@ -97,7 +97,7 @@ namespace Excel2Json
             this.MyTip2.Name = "MyTip2";
             this.MyTip2.Size = new System.Drawing.Size(275, 72);
             this.MyTip2.TabIndex = 6;
-            this.MyTip2.Text = "备注：\r\n·Excel第一行固定作为列名，第二行固定为为类型\r\n·当前版本数据默认从第一列开始\r\n·Header代表Excel表头有几行\r\n·全表输出到一个Jso" +
+            this.MyTip2.Text = "备注：\r\n·Excel第一行固定作为字段名，第二行固定为类型\r\n·当前版本数据默认从第一列开始\r\n·Header代表Excel表头有几行\r\n·全表输出到一个Jso" +
     "n文件中\r\n·编码和日期格式？那是什么？可以次吗？";
             // 
             // Option_dataformat_comboBox
