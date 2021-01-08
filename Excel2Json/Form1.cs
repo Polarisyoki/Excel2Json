@@ -46,7 +46,10 @@ namespace Excel2Json
 
                 OpenFD.ShowDialog();
                 fileName = OpenFD.FileName;
-                
+
+                if (fileName.IndexOf(":") < 0)
+                    return;//点了取消
+
                 string[] str = fileName.Split('.');
                 switch (str[str.Length - 1].ToLower())
                 {
@@ -81,6 +84,8 @@ namespace Excel2Json
 
                 OpenFD.ShowDialog();
                 fileName = OpenFD.FileName;
+
+                if (fileName.IndexOf(":") < 0) return;//点了取消
 
                 try
                 {

@@ -78,7 +78,7 @@ namespace Excel2Json
                             fi.SetValue(myclass, null);
                         }
                     }
-                    items.Add(myclass);
+                    items.Add(myclass);                    
                 }
                 singleTable.Add(table.TableName, items);
             }
