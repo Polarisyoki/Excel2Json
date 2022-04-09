@@ -46,10 +46,7 @@ namespace Excel2Json
 
                 OpenFD.ShowDialog();
                 fileName = OpenFD.FileName;
-
-                if (fileName.IndexOf(":") < 0)
-                    return;//点了取消
-
+                
                 string[] str = fileName.Split('.');
                 switch (str[str.Length - 1].ToLower())
                 {
@@ -80,16 +77,15 @@ namespace Excel2Json
                 OpenFD.Filter = @"Json文件(*.json)|*.json";
                 OpenFD.RestoreDirectory = true;
                 //定义打开的默认文件夹位置
-                OpenFD.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                //OpenFD.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
                 OpenFD.ShowDialog();
                 fileName = OpenFD.FileName;
 
-                if (fileName.IndexOf(":") < 0) return;//点了取消
-
                 try
                 {
-                    MyExcelFunction.Transform(Url1.Text, fileName, curExcelType, Option_header_comboBox.SelectedIndex);
+                    int header = Option_header_comboBox.SelectedIndex + 3;
+                    MyExcelFunction.Transform(Url1.Text, fileName, curExcelType, header);
                 }
                 catch
                 {

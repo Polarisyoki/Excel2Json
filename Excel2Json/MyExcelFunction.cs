@@ -44,7 +44,7 @@ namespace Excel2Json
                 var result = reader.AsDataSet();
 
                 var temp = GetClassData(result, rowStart, colStart);
-                JsonManager.WriteToJson(jsonPath, temp);
+                MyJsonUtils.WriteToJson(jsonPath, temp);
             }
         }
 
@@ -71,14 +71,67 @@ namespace Excel2Json
                             continue;
                         try
                         {
-                            fi.SetValue(myclass, Convert.ChangeType(table.Rows[m][n], GetYourType(types[n].ToString())));
+                            if(fi.FieldType.IsArray)
+                            {
+                                var elementType = fi.FieldType.GetElementType();
+                                if(elementType.IsArray)
+                                {
+                                    //int[][] ,string[][]
+                                    var elemType2 = elementType.GetElementType();
+                                    var str = table.Rows[m][n].ToString();
+                                    var strs = table.Rows[m][n].ToString().Split(new char[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
+                                    Array myArray = Array.CreateInstance(elementType, strs.Length);
+                                    for(int p = 0;p<strs.Length;p++)
+                                    {
+                                        var strs2 = strs[p].Split(new char[] { '|', ':' }, StringSplitOptions.RemoveEmptyEntries);
+                                        Array myArray2 = Array.CreateInstance(elemType2, strs2.Length);
+                                        for(int q = 0;q < strs2.Length;q++)
+                                        {
+                                            if (elemType2 == typeof(int))
+                                            {
+                                                myArray2.SetValue(int.Parse(strs2[q]), q);
+                                            }
+                                            else if (elemType2 == typeof(string))
+                                            {
+                                                myArray2.SetValue(strs2[q], q);
+                                            }
+                                        }
+                                        myArray.SetValue(myArray2, p);
+                                    }
+                                    fi.SetValue(myclass, myArray);
+                                }
+                                else
+                                {
+                                    //int[] , string[]
+                                    var strs = table.Rows[m][n].ToString().Split(new char[] { '|', ':' }, StringSplitOptions.RemoveEmptyEntries);
+                                    Array myArray = Array.CreateInstance(elementType, strs.Length);
+                                    for (int p = 0; p < strs.Length; p++)
+                                    {
+                                        if (elementType == typeof(int))
+                                        {
+                                            myArray.SetValue(int.Parse(strs[p]), p);
+                                        }
+                                        else if (elementType == typeof(string))
+                                        {
+                                            myArray.SetValue(strs[p], p);
+                                        }
+                                    }
+                                    fi.SetValue(myclass, myArray);
+                                }
+                                
+                            }                          
+                            else
+                            {
+                                fi.SetValue(myclass, Convert.ChangeType(table.Rows[m][n], GetYourType(types[n].ToString())));
+                            }
+
                         }
                         catch
                         {
                             fi.SetValue(myclass, null);
                         }
                     }
-                    items.Add(myclass);                    
+                    items.Add(myclass);
                 }
                 singleTable.Add(table.TableName, items);
             }
@@ -121,16 +174,22 @@ namespace Excel2Json
             {
                 case "string":
                     return typeof(string);
-                case "float":
-                    return typeof(float);
-                case "single":
-                    return typeof(float);
+                case "string[]":
+                    return typeof(string[]);
+                case "string[][]":
+                    return typeof(string[][]);
                 case "double":
                     return typeof(double);
                 case "int":
-                    return typeof(int);
                 case "int32":
                     return typeof(int);
+                case "int[]":
+                    return typeof(int[]);
+                case "int[][]":
+                    return typeof(int[][]);             
+                case "float":
+                case "single":
+                    return typeof(float);
                 default:
                     return typeof(string);
 
